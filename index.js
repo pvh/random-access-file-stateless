@@ -5,7 +5,6 @@ const raf = require('random-access-file')
 var rafMap = {};
 
 const wrapper = function (name, opts) {
-
   return ras({
     read: (req) => fwd(0, req),
     write: (req) => fwd(1, req),
@@ -27,15 +26,6 @@ const wrapper = function (name, opts) {
       case 2: return file.del(req.offset, req.size, cb)
       case 3: return file.stat(cb)
     }
-  }
-
-  function enlist(name, implementation) {
-    rafMap[name] = file
-    // remove from ring buffer here
-  }
-
-  function delist(name) {
-    delete rafMap[name]
   }
 }
 
