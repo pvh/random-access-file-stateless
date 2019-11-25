@@ -1,9 +1,9 @@
 {
-  "name": "random-access-file-pool",
+  "name": "random-access-file-stateless",
   "version": "1.0.0",
-  "description": "pool file handles for random-access-file to avoid hitting EMFILE",
+  "description": "create new file handles on every request for random-access-file to avoid hitting EMFILE",
   "main": "index.js",
-  "repository": "https://github.com/pvh/random-access-file-pool",
+  "repository": "https://github.com/pvh/random-access-file-stateless",
   "author": "Peter van Hardenberg <pvh@pvh.ca>",
   "license": "MIT",
   "scripts": {
