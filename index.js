@@ -1,38 +1,42 @@
-var randomAccess = require("random-access-storage");
-var randomAccessFile = require("random-access-file");
+
+const ras = require('random-access-storage')
+const raf = require('random-access-file')
 
 var rafMap = {};
-var rafBuf = [];
 
-function filePool(name) {
+const wrapper = function (name, opts) {
 
-  return randomAccess({
-    open: function(req) {
-      var raf = randomAccessFile(name);
-      rafMap[req.filename] = raf;
-      rafBuf.push(raf);
+  return ras({
+    read: (req) => fwd(0, req),
+    write: (req) => fwd(1, req),
+    del: (req) => fwd(2, req),
+    stat: (req) => fwd(3, req),
+  })
 
-      raf.open(req)
-    },
-    read: function(req) {
-      return rafMap[req.filename].read(req);
-    },
+  function fwd (type, req) {
+    var file = raf(name, opts)
+    const innerCb = req.callback.bind(req)
 
-    write: function(req) {
-      return rafMap[req.filename].write(req);
-    },
-
-    del: function(req) {
-      return rafMap[req.filename].del(req);
-    },
-
-    close: function(req) {
-      if (!fd) return req.callback(null);
-      fs.close(fd, err => req.callback(err));
-      delete rafMap[req.filename];
-      rafBuf = rafBuf.filter(f => f === raf);
+    const cb = (...args) => { 
+        file.close(() => {innerCb(...args)})
     }
-  });
-};
 
-module.exports = filePool
+    switch (type) {
+      case 0: return file.read(req.offset, req.size, cb)
+      case 1: return file.write(req.offset, req.data, cb)
+      case 2: return file.del(req.offset, req.size, cb)
+      case 3: return file.stat(cb)
+    }
+  }
+
+  function enlist(name, implementation) {
+    rafMap[name] = file
+    // remove from ring buffer here
+  }
+
+  function delist(name) {
+    delete rafMap[name]
+  }
+}
+
+module.exports = wrapper

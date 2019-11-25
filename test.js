@@ -1,6 +1,8 @@
 var test = require("random-access-test")
 var os = require("os")
-var randomAccess = require(".") // Or your package instead
+
+const randomAccess = require('.')
+
 var path = require("path")
 
 var tmp = path.join(
